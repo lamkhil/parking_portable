@@ -1,4 +1,8 @@
+import 'dart:developer';
+
+import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -6,6 +10,7 @@ import 'package:parking_portable/app/widgets/app_loading.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 import '../controllers/login_controller.dart';
+import 'package:image/image.dart';
 
 class LoginView extends GetView<LoginController> {
   const LoginView({super.key});
@@ -177,17 +182,16 @@ class LoginView extends GetView<LoginController> {
                       );
                       return;
                     }
+
                     String enter = '\n';
                     await PrintBluetoothThermal.writeBytes(enter.codeUnits);
-                    //size of 1-5
-                    await PrintBluetoothThermal.writeString(
-                      printText: PrintTextSize(
-                        size: 5,
-                        text: "Aplikasi Parking Portable$enter",
+                    await PrintBluetoothThermal.writeBytes(
+                      await parkirTicket(
+                        noTicket: "A001",
+                        plat: "B 1234 CD",
+                        masuk: DateTime.now(),
                       ),
                     );
-                    await PrintBluetoothThermal.writeBytes(enter.codeUnits);
-                    await PrintBluetoothThermal.writeBytes(enter.codeUnits);
                     await PrintBluetoothThermal.writeBytes(enter.codeUnits);
                     await PrintBluetoothThermal.disconnect;
                     Get.close(1);
@@ -214,5 +218,62 @@ class LoginView extends GetView<LoginController> {
         ),
       ),
     );
+  }
+
+  Future<List<int>> parkirTicket({
+    required String noTicket,
+    required String plat,
+    required DateTime masuk,
+    String? gate = 'Gate 1',
+  }) async {
+    final profile = await CapabilityProfile.load(); // default profile
+    final generator = Generator(PaperSize.mm80, profile);
+    List<int> bytes = [];
+
+    // --- HEADER ---
+    bytes += generator.text(
+      'PARKIR PORTABLE',
+      styles: PosStyles(
+        align: PosAlign.center,
+        bold: true,
+        height: PosTextSize.size2,
+        width: PosTextSize.size2,
+      ),
+      linesAfter: 1,
+    );
+    bytes += generator.text(
+      'Tiket Parkir',
+      styles: PosStyles(align: PosAlign.center, bold: true),
+      linesAfter: 1,
+    );
+
+    // --- TICKET INFO ---
+    bytes += generator.text('No Tiket : $noTicket');
+    bytes += generator.text('Plat     : $plat');
+    bytes += generator.text('Gate     : $gate');
+    bytes += generator.text(
+      'Masuk    : ${masuk.toString().split('.')[0]}',
+      linesAfter: 1,
+    );
+
+    // --- BARCODE ---
+    bytes += generator.barcode(
+      Barcode.code128(noTicket.split('')),
+      width: 2,
+      height: 80,
+    );
+
+    // --- FOOTER ---
+    bytes += generator.feed(2);
+    bytes += generator.text(
+      'Terima kasih sudah menggunakan layanan kami.',
+      styles: PosStyles(align: PosAlign.center),
+      linesAfter: 2,
+    );
+
+    // --- CUT ---
+    bytes += generator.cut();
+
+    return bytes;
   }
 }
