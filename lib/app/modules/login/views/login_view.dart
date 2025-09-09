@@ -1,9 +1,9 @@
-import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:parking_portable/app/widgets/app_loading.dart';
+import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 import '../controllers/login_controller.dart';
 
@@ -124,30 +124,73 @@ class LoginView extends GetView<LoginController> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    BlueThermalPrinter printer = BlueThermalPrinter.instance;
-                    List<BluetoothDevice> devices = [];
-                    try {
-                      devices = await printer.getBondedDevices();
-                      await printer.connect(devices[0]);
-                    } catch (e) {
-                      debugPrint("Error init printer: $e");
-                    }
-                    bool? isConnected = await printer.isConnected;
-                    if (isConnected == true) {
-                      printer.printNewLine();
-                      printer.printCustom(
-                        "Hello Kozen P10!",
-                        1,
-                        1,
-                      ); // (text, size, align)
-                      printer.printNewLine();
-                      printer.printNewLine();
-                    } else {
+                    AppDialog.instance.loading();
+                    final bool enabled =
+                        await PrintBluetoothThermal.bluetoothEnabled;
+
+                    if (!enabled) {
+                      Get.close(1);
                       AppDialog.instance.basic(
-                        title: 'Oops!!',
-                        description: "Printer Not Connected",
+                        title: "Oops!",
+                        description:
+                            "Nyalakan bluetooth dan sambungkan printer!!",
                       );
+                      return;
                     }
+                    final List<BluetoothInfo> listResult =
+                        await PrintBluetoothThermal.pairedBluetooths;
+                    final BluetoothInfo? selectedDevice = listResult
+                        .where(
+                          (e) =>
+                              e.name.toLowerCase().contains(
+                                "bluetoothprinter",
+                              ) ==
+                              true,
+                        )
+                        .firstOrNull;
+                    if (selectedDevice == null) {
+                      Get.close(1);
+                      AppDialog.instance.basic(
+                        title: "Oops!",
+                        description: "Printer bluetooth tidak ditemukan!!",
+                      );
+                      return;
+                    }
+                    final bool result = await PrintBluetoothThermal.connect(
+                      macPrinterAddress: selectedDevice.macAdress,
+                    );
+                    if (!result) {
+                      Get.close(1);
+                      AppDialog.instance.basic(
+                        title: "Oops!",
+                        description: "Gagal terhubung ke printer!!",
+                      );
+                      return;
+                    }
+                    bool conexionStatus =
+                        await PrintBluetoothThermal.connectionStatus;
+                    if (!conexionStatus) {
+                      Get.close(1);
+                      AppDialog.instance.basic(
+                        title: "Oops!",
+                        description: "Printer bluetooth tidak terhubung!!",
+                      );
+                      return;
+                    }
+                    String enter = '\n';
+                    await PrintBluetoothThermal.writeBytes(enter.codeUnits);
+                    //size of 1-5
+                    await PrintBluetoothThermal.writeString(
+                      printText: PrintTextSize(
+                        size: 5,
+                        text: "Aplikasi Parking Portable$enter",
+                      ),
+                    );
+                    await PrintBluetoothThermal.writeBytes(enter.codeUnits);
+                    await PrintBluetoothThermal.writeBytes(enter.codeUnits);
+                    await PrintBluetoothThermal.writeBytes(enter.codeUnits);
+                    await PrintBluetoothThermal.disconnect;
+                    Get.close(1);
                   },
                   style: ElevatedButton.styleFrom(
                     padding: const EdgeInsets.symmetric(vertical: 14),
