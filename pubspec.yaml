@@ -37,8 +37,8 @@ dependencies:
   dio: ^5.9.0
   get: ^4.7.2
   lottie: ^3.3.1
-  kozen_printer: ^0.0.2
   get_storage: ^2.1.1
+  blue_thermal_printer: ^1.2.3
 
 dev_dependencies:
   flutter_test:

@@ -1,9 +1,9 @@
-import 'dart:io';
-
+import 'package:blue_thermal_printer/blue_thermal_printer.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
+import 'package:parking_portable/app/widgets/app_loading.dart';
 
 import '../controllers/login_controller.dart';
 
@@ -111,6 +111,53 @@ class LoginView extends GetView<LoginController> {
                   ),
                   child: const Text(
                     "Login",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () async {
+                    BlueThermalPrinter printer = BlueThermalPrinter.instance;
+                    List<BluetoothDevice> devices = [];
+                    try {
+                      devices = await printer.getBondedDevices();
+                      await printer.connect(devices[0]);
+                    } catch (e) {
+                      debugPrint("Error init printer: $e");
+                    }
+                    bool? isConnected = await printer.isConnected;
+                    if (isConnected == true) {
+                      printer.printNewLine();
+                      printer.printCustom(
+                        "Hello Kozen P10!",
+                        1,
+                        1,
+                      ); // (text, size, align)
+                      printer.printNewLine();
+                      printer.printNewLine();
+                    } else {
+                      AppDialog.instance.basic(
+                        title: 'Oops!!',
+                        description: "Printer Not Connected",
+                      );
+                    }
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    backgroundColor: Colors.pink,
+                  ),
+                  child: const Text(
+                    "Test",
                     style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,

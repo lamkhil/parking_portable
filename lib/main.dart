@@ -6,15 +6,27 @@ import 'package:parking_portable/app/bindings/app_binding.dart';
 
 import 'app/routes/app_pages.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await GetStorage.init();
-  runApp(
-    GetMaterialApp(
+  runApp(MyApp());
+}
+
+class MyApp extends StatefulWidget {
+  const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  Widget build(BuildContext context) {
+    return GetMaterialApp(
       title: "Application",
       initialRoute: AppPages.INITIAL,
       getPages: AppPages.routes,
       initialBinding: AppBinding(),
-    ),
-  );
+    );
+  }
 }
