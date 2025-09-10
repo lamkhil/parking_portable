@@ -1,8 +1,5 @@
-import 'dart:developer';
-
 import 'package:esc_pos_utils_plus/esc_pos_utils_plus.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
@@ -10,7 +7,6 @@ import 'package:parking_portable/app/widgets/app_loading.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 import '../controllers/login_controller.dart';
-import 'package:image/image.dart';
 
 class LoginView extends GetView<LoginController> {
   const LoginView({super.key});
