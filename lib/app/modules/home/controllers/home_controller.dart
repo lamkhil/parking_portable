@@ -39,9 +39,7 @@ class HomeController extends GetxController with StateMixin<List<VehicleType>> {
 
   @override
   void onInit() {
-    loadProfile();
-    getVehicleType();
-    checkPrinter();
+    refreshData();
     super.onInit();
   }
 
@@ -56,6 +54,12 @@ class HomeController extends GetxController with StateMixin<List<VehicleType>> {
     super.onClose();
   }
 
+  void refreshData() {
+    loadProfile();
+    getVehicleType();
+    checkPrinter();
+  }
+
   Future<void> checkPrinter() async {
     bluetoothOn.value = await PrintBluetoothThermal.bluetoothEnabled;
     final List<BluetoothInfo> listResult =
@@ -64,7 +68,9 @@ class HomeController extends GetxController with StateMixin<List<VehicleType>> {
         .where((e) => e.name.toLowerCase().contains("bluetoothprinter") == true)
         .firstOrNull;
     device.value = selectedDevice;
-    if (selectedDevice != null) {
+    final isConnected = await PrintBluetoothThermal.connectionStatus;
+    connectDevice.value = isConnected;
+    if (selectedDevice != null && isConnected == false) {
       final bool result = await PrintBluetoothThermal.connect(
         macPrinterAddress: selectedDevice.macAdress,
       );
@@ -115,8 +121,38 @@ class HomeController extends GetxController with StateMixin<List<VehicleType>> {
       );
       return;
     }
+    final confirm = await AppDialog.instance.basic(
+      title: "Konfirmasi",
+      description:
+          '''
+Apakah data sudah benar?
+Plat Nomor: ${vehicleNumber.text}
+Tipe Kendaraan: ${state![selectedVehicle.value].name}
+Metode Pembayaran: ${paymentMethod.value == 'cash' ? 'Tunai' : 'QRIS'}
+Tarif: ${NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).format(state![selectedVehicle.value].parkingRateRules?.firstOrNull?.fixedPrice ?? 0)}
+''',
+      actions: [
+        ElevatedButton(
+          onPressed: () {
+            Get.back(result: false);
+          },
+          child: Text("Tidak"),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Get.back(result: true);
+          },
+          child: Text("Iya"),
+        ),
+      ],
+    );
+    if (confirm != true) {
+      return;
+    }
     final result = await ParkingServices.entryAndExit(
-      ticketNumber: generateTicketNumber(app.user.value!.parkingGate!.name!),
+      ticketNumber: generateTicketNumber(
+        app.user.value!.parkingGate!.id!.toString(),
+      ),
       vehiclePlateNumber: vehicleNumber.text,
       vehicleTypeId: state![selectedVehicle.value].id!,
       paymentMethod: paymentMethod.value,

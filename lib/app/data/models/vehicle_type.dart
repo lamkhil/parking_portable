@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 class VehicleType {
   int? id;
   String? name;
@@ -63,9 +65,9 @@ class ParkingRateRules {
   int? vehicleTypeId;
   int? startMinute;
   int? endMinute;
-  int? fixedPrice;
-  int? perHourPrice;
-  int? perDayPrice;
+  double? fixedPrice;
+  double? perHourPrice;
+  double? perDayPrice;
   String? createdAt;
   String? updatedAt;
 
@@ -82,13 +84,14 @@ class ParkingRateRules {
   });
 
   ParkingRateRules.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    vehicleTypeId = json['vehicle_type_id'];
-    startMinute = json['start_minute'];
-    endMinute = json['end_minute'];
-    fixedPrice = json['fixed_price'];
-    perHourPrice = json['per_hour_price'];
-    perDayPrice = json['per_day_price'];
+    log(json.toString());
+    id = int.tryParse(json['id'].toString());
+    vehicleTypeId = int.tryParse(json['vehicle_type_id'].toString());
+    startMinute = int.tryParse(json['start_minute'].toString());
+    endMinute = int.tryParse(json['end_minute'].toString());
+    fixedPrice = double.tryParse(json['fixed_price'].toString());
+    perHourPrice = double.tryParse(json['per_hour_price'].toString());
+    perDayPrice = double.tryParse(json['per_day_price'].toString());
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }

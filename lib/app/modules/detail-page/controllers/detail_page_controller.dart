@@ -7,26 +7,11 @@ import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 class DetailPageController extends GetxController {
   final ParkingTicket ticket = Get.arguments;
-  @override
-  void onInit() {
-    super.onInit();
-  }
-
-  @override
-  void onReady() {
-    super.onReady();
-  }
-
-  @override
-  void onClose() {
-    super.onClose();
-  }
 
   Future<void> print() async {
     AppDialog.instance.loading();
 
     String enter = '\n';
-    await PrintBluetoothThermal.writeBytes(enter.codeUnits);
     await PrintBluetoothThermal.writeBytes(
       await parkirTicket(
         noTicket: ticket.ticketNumber ?? '-',
@@ -79,12 +64,10 @@ class DetailPageController extends GetxController {
         height: PosTextSize.size2,
         width: PosTextSize.size2,
       ),
-      linesAfter: 1,
     );
     bytes += generator.text(
       'Tiket Parkir',
       styles: PosStyles(align: PosAlign.center, bold: true),
-      linesAfter: 1,
     );
 
     // --- TICKET INFO ---
@@ -95,7 +78,6 @@ class DetailPageController extends GetxController {
     bytes += generator.text('Kendaraan: $kendaraan');
     bytes += generator.text(
       'Masuk    : ${masuk.toString().split('.')[0].replaceAll('T', " ")}',
-      linesAfter: 1,
     );
 
     // --- BARCODE ---
@@ -106,11 +88,9 @@ class DetailPageController extends GetxController {
     );
 
     // --- FOOTER ---
-    bytes += generator.feed(2);
     bytes += generator.text(
       'Terima kasih sudah menggunakan layanan kami.',
       styles: PosStyles(align: PosAlign.center),
-      linesAfter: 2,
     );
 
     // --- CUT ---

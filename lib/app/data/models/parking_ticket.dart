@@ -69,8 +69,8 @@ class ParkingTicket {
     createdAt = json['created_at'];
     id = int.tryParse(json['id'].toString());
     exitedAt = json['exited_at'];
-    durationMinutes = json['duration_minutes'];
-    amount = json['amount'];
+    durationMinutes = double.tryParse(json['duration_minutes'].toString());
+    amount = double.tryParse(json['amount'].toString())?.toInt();
     paymentMethod = json['payment_method'];
     parkingGateIn = json['parking_gate_in'] != null
         ? new ParkingGate.fromJson(json['parking_gate_in'])
