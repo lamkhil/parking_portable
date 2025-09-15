@@ -2,6 +2,7 @@ class User {
   int? id;
   String? name;
   String? email;
+  String? appName;
   String? emailVerifiedAt;
   String? createdAt;
   String? updatedAt;
@@ -14,6 +15,7 @@ class User {
     this.id,
     this.name,
     this.email,
+    this.appName,
     this.emailVerifiedAt,
     this.createdAt,
     this.updatedAt,
@@ -27,6 +29,7 @@ class User {
     id = json['id'];
     name = json['name'];
     email = json['email'];
+    appName = json['app_name'];
     emailVerifiedAt = json['email_verified_at'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
@@ -42,6 +45,7 @@ class User {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['name'] = this.name;
+    data['app_name'] = this.appName;
     data['email'] = this.email;
     data['email_verified_at'] = this.emailVerifiedAt;
     data['created_at'] = this.createdAt;

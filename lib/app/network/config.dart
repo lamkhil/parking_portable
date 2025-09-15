@@ -13,7 +13,7 @@ final Dio dio =
             "Content-Type": "application/json",
             "Accept": "application/json",
           },
-          followRedirects: false,
+          followRedirects: true,
           validateStatus: (status) {
             return status! < 500;
           },

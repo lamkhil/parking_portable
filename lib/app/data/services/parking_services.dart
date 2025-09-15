@@ -2,7 +2,9 @@ import 'dart:developer';
 import 'dart:io';
 
 import 'package:dio/dio.dart';
-import 'package:parking_portable/app/data/models/parking_ticket.dart';
+import 'package:parking_portable/app/data/models/parking_ticket.dart'
+    hide VehicleType;
+import 'package:parking_portable/app/data/models/rekap_ticket.dart';
 import 'package:parking_portable/app/data/models/response_api.dart';
 import 'package:parking_portable/app/data/models/vehicle_type.dart';
 import 'package:parking_portable/app/extension/response_extensions.dart';
@@ -95,6 +97,79 @@ class ParkingServices {
         data: ParkingTicket.fromJson(result.data['data']),
         success: true,
         message: result.data['message'] ?? "Pembayaran berhasil",
+      );
+    } catch (e) {
+      return ResponseApi(data: null, success: false, message: e.toString());
+    }
+  }
+
+  static Future<ResponseApi<List<ParkingTicket>>> getUnrekapTickets() async {
+    try {
+      final result = await dio.get('unrekap');
+
+      if (!result.isSuccess) {
+        return ResponseApi(
+          data: null,
+          success: false,
+          message: result.data['message'] ?? "Gagal mengambil data tiket",
+        );
+      }
+
+      return ResponseApi(
+        data: (result.data['data'] as List)
+            .map((e) => ParkingTicket.fromJson(e))
+            .toList(),
+        success: true,
+      );
+    } catch (e) {
+      return ResponseApi(data: null, success: false, message: e.toString());
+    }
+  }
+
+  static Future<ResponseApi<RekapTicket>> rekapTickets() async {
+    try {
+      final result = await dio.post('rekap');
+
+      if (!result.isSuccess) {
+        return ResponseApi(
+          data: null,
+          success: false,
+          message: result.data['message'] ?? "Gagal merekap tiket",
+        );
+      }
+
+      return ResponseApi(
+        data: RekapTicket.fromJson(result.data['data']),
+        success: true,
+        message: result.data['message'] ?? "Rekap tiket berhasil",
+      );
+    } catch (e) {
+      return ResponseApi(data: null, success: false, message: e.toString());
+    }
+  }
+
+  static Future<ResponseApi<List<RekapTicket>>> getRekap({
+    int page = 1,
+    int limit = 20,
+  }) async {
+    try {
+      final result = await dio.get(
+        'rekap',
+        queryParameters: {'page': page, 'per_page': limit},
+      );
+
+      if (!result.isSuccess) {
+        return ResponseApi(
+          data: null,
+          success: false,
+          message: result.data['message'] ?? "Gagal mengambil data rekap",
+        );
+      }
+      return ResponseApi(
+        data: (result.data['data'] as List)
+            .map((e) => RekapTicket.fromJson(e))
+            .toList(),
+        success: true,
       );
     } catch (e) {
       return ResponseApi(data: null, success: false, message: e.toString());

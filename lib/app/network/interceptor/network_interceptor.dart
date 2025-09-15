@@ -32,7 +32,9 @@ class NetworkInterceptor extends Interceptor {
   ) async {
     if (response.data is Map) {
       if (response.data['message'] == "Unauthenticated.") {
-        Get.offAllNamed(Routes.LOGIN);
+        Future.delayed(
+          Duration(seconds: 1),
+        ).then((_) => Get.offAllNamed(Routes.LOGIN));
       }
     }
     return super.onResponse(response, handler);

@@ -24,6 +24,8 @@ class HomeController extends GetxController with StateMixin<List<VehicleType>> {
   final ImagePicker _picker = ImagePicker();
   final paymentMethod = 'cash'.obs;
 
+  final pageView = 0.obs;
+
   Future<void> pickImageFromCamera() async {
     final XFile? pickedFile = await _picker.pickImage(
       source: ImageSource.camera,
@@ -107,20 +109,20 @@ class HomeController extends GetxController with StateMixin<List<VehicleType>> {
       );
       return;
     }
-    if (bluetoothOn.value != true) {
-      AppDialog.instance.basic(
-        title: "Oops!",
-        description: "Printer Belum Terhubung",
-      );
-      return;
-    }
-    if (!(await PrintBluetoothThermal.connectionStatus)) {
-      AppDialog.instance.basic(
-        title: "Oops!",
-        description: "Printer Belum Terhubung",
-      );
-      return;
-    }
+    // if (bluetoothOn.value != true) {
+    //   AppDialog.instance.basic(
+    //     title: "Oops!",
+    //     description: "Printer Belum Terhubung",
+    //   );
+    //   return;
+    // }
+    // if (!(await PrintBluetoothThermal.connectionStatus)) {
+    //   AppDialog.instance.basic(
+    //     title: "Oops!",
+    //     description: "Printer Belum Terhubung",
+    //   );
+    //   return;
+    // }
     final confirm = await AppDialog.instance.basic(
       title: "Konfirmasi",
       description:
@@ -149,6 +151,7 @@ Tarif: ${NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).fo
     if (confirm != true) {
       return;
     }
+    AppDialog.instance.loading();
     final result = await ParkingServices.entryAndExit(
       ticketNumber: generateTicketNumber(
         app.user.value!.parkingGate!.id!.toString(),
@@ -157,6 +160,7 @@ Tarif: ${NumberFormat.currency(locale: 'id', symbol: 'Rp ', decimalDigits: 0).fo
       vehicleTypeId: state![selectedVehicle.value].id!,
       paymentMethod: paymentMethod.value,
     );
+    Get.back();
 
     if (result.success == false) {
       AppDialog.instance.basic(
